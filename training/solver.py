@@ -12,26 +12,16 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.autograd import Variable
 
-from model import Model
+from model import CNNSA
 
 
 class Solver(object):
     def __init__(self, data_loader, config):
         # data loader
-        self.input_length = config.input_length
         self.data_loader = data_loader
         self.dataset = config.dataset
         self.data_path = config.data_path
         self.get_dataset()
-
-        # model hyper-parameters
-        self.conv_channels = config.conv_channels
-        self.sample_rate = config.sample_rate
-        self.n_fft = config.n_fft
-        self.n_harmonic = config.n_harmonic
-        self.semitone_scale = config.semitone_scale
-        self.learn_f0 = config.learn_f0
-        self.learn_bw = config.learn_bw
 
         # training settings
         self.n_epochs = config.n_epochs
@@ -48,6 +38,7 @@ class Solver(object):
         self.is_cuda = torch.cuda.is_available()
 
         # Build model
+        self.model_type = config.model_type
         self.build_model()
 
     def get_dataset(self):
@@ -56,14 +47,21 @@ class Solver(object):
             self.binary = np.load(os.path.join(self.data_path, 'data/binary.npy'))
 
     def get_model(self):
-        return Model(conv_channels=128,
-                     sample_rate=self.sample_rate,
-                     n_fft=self.n_fft,
-                     n_harmonic=self.n_harmonic,
-                     semitone_scale=self.semitone_scale,
-                     learn_f0=self.learn_f0,
-                     learn_bw=self.learn_bw,
-                     dataset=self.dataset)
+        if self.model_type == 'fcn':
+            from model import FCN as Model
+        elif self.model_type == 'musicnn':
+            from model import Musicnn as Model
+        elif self.model_type == 'crnn':
+            from model import CRNN as Model
+        elif self.model_type == 'sample':
+            from model import SampleCNN as Model
+        elif self.model_type == 'se':
+            from model import SampleCNNSE as Model
+        elif self.model_type == 'vgg':
+            from model import VggishCNN as Model
+        elif self.model_type == 'attention':
+            from model import CNNSA as Model
+        return Model()
 
     def build_model(self):
         # model

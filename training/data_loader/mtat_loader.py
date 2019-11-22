@@ -4,7 +4,8 @@ import numpy as np
 from torch.utils import data
 
 class AudioFolder(data.Dataset):
-    def __init__(self, root, dataset=None, input_length=None):
+    def __init__(self, root, trval='TRAIN', dataset=None, input_length=None):
+        self.trval = trval
         self.root = root
         self.dataset = dataset
         self.input_length = input_length
@@ -37,8 +38,8 @@ class AudioFolder(data.Dataset):
         return len(self.fl)
 
 
-def get_audio_loader(root, batch_size, num_workers=0, dataset=None, input_length=None):
-    data_loader = data.DataLoader(dataset=AudioFolder(root, dataset=dataset, input_length=input_length),
+def get_audio_loader(root, batch_size, trval='TRAIN', num_workers=0, dataset=None, data_type=None, input_length=None):
+    data_loader = data.DataLoader(dataset=AudioFolder(root, trval=trval, dataset=dataset, input_length=input_length),
                                   batch_size=batch_size,
                                   shuffle=True,
                                   drop_last=False,
