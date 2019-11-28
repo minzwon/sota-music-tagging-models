@@ -22,8 +22,7 @@ class FCN(nn.Module):
                 f_min=0.0,
                 f_max=8000.0,
                 n_mels=96,
-                n_class=50,
-                dataset='mtat'):
+                n_class=50):
         super(FCN, self).__init__()
 
         # Spectrogram
@@ -163,8 +162,7 @@ class CRNN(nn.Module):
                 f_min=0.0,
                 f_max=8000.0,
                 n_mels=96,
-                n_class=50,
-                dataset='mtat'):
+                n_class=50):
         super(CRNN, self).__init__()
 
         # Spectrogram
