@@ -10,6 +10,10 @@ def main(config):
     # import data loader
     if config.dataset == 'mtat':
         from data_loader.mtat_loader import get_audio_loader
+    elif config.dataset == 'msd':
+        from data_loader.msd_loader import get_audio_loader
+    elif config.dataset == 'jamendo':
+        from data_loader.jamendo_loader import get_audio_loader
 
     # audio length
     if config.model_type == 'fcn' or config.model_type == 'crnn':
@@ -35,8 +39,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     parser.add_argument('--num_workers', type=int, default=0)
-    parser.add_argument('--dataset', type=str, default='mtat', choices=['mtat', 'msd', 'mtg-jamendo'])
-    parser.add_argument('--model_type', type=str, default='fcn', 
+    parser.add_argument('--dataset', type=str, default='mtat', choices=['mtat', 'msd', 'jamendo'])
+    parser.add_argument('--model_type', type=str, default='fcn',
 						choices=['fcn', 'musicnn', 'crnn', 'sample', 'se', 'vgg', 'attention'])
     parser.add_argument('--n_epochs', type=int, default=200)
     parser.add_argument('--batch_size', type=int, default=16)

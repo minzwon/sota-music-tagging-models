@@ -430,7 +430,7 @@ class CNNSA(nn.Module):
     def get_cls(self, channel):
         np.random.seed(0)
         single_cls = torch.Tensor(np.random.random((1, channel)))
-        vec_cls = torch.cat([single_cls for _ in range(32)], dim=0)
+        vec_cls = torch.cat([single_cls for _ in range(64)], dim=0)
         vec_cls = vec_cls.unsqueeze(1)
         return vec_cls
 
