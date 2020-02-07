@@ -64,14 +64,14 @@ class Predict(object):
         elif self.model_type == 'se':
             self.input_length = 59049
             return Model.SampleCNNSE()
-        elif self.model_type == 'vgg':
+        elif self.model_type == 'boc':
             self.input_length = 59049
-            return Model.VggishCNN()
+            return Model.BoCCNN()
         elif self.model_type == 'attention':
             self.input_length = 15 * 16000
             return Model.CNNSA()
         else:
-            print('model_type has to be one of [fcn, musicnn, crnn, sample, se, vgg, attention]')
+            print('model_type has to be one of [fcn, musicnn, crnn, sample, se, boc, attention]')
 
     def build_model(self):
         self.model = self.get_model()
@@ -195,7 +195,7 @@ if __name__ == '__main__':
     parser.add_argument('--num_workers', type=int, default=0)
     parser.add_argument('--dataset', type=str, default='mtat', choices=['mtat', 'msd', 'jamendo'])
     parser.add_argument('--model_type', type=str, default='fcn',
-                        choices=['fcn', 'musicnn', 'crnn', 'sample', 'se', 'vgg', 'attention'])
+                        choices=['fcn', 'musicnn', 'crnn', 'sample', 'se', 'boc', 'attention'])
     parser.add_argument('--batch_size', type=int, default=16)
     parser.add_argument('--model_load_path', type=str, default='.')
     parser.add_argument('--data_path', type=str, default='./data')

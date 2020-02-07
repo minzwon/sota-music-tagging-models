@@ -303,9 +303,9 @@ class SampleCNNSE(nn.Module):
         return x
 
 
-class VggishCNN(nn.Module):
+class BoCCNN(nn.Module):
     '''
-    vgg-ish architecture with residual connections, deeper layers, smaller pooling (2x2).
+    Bag-of-chunk CNN architecture with residual connections, deeper layers, smaller pooling (2x2).
     '''
     def __init__(self,
                 n_channels=128,
@@ -315,7 +315,7 @@ class VggishCNN(nn.Module):
                 f_max=8000.0,
                 n_mels=128,
                 n_class=50):
-        super(VggishCNN, self).__init__()
+        super(BoCCNN, self).__init__()
 
         # Spectrogram
         self.spec = torchaudio.transforms.MelSpectrogram(sample_rate=sample_rate,

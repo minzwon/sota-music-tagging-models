@@ -110,8 +110,8 @@ class Solver(object):
             return Model.SampleCNN()
         elif self.model_type == 'se':
             return Model.SampleCNNSE()
-        elif self.model_type == 'vgg':
-            return Model.VggishCNN()
+        elif self.model_type == 'boc':
+            return Model.BoCCNN()
         elif self.model_type == 'attention':
             return Model.CNNSA()
 
