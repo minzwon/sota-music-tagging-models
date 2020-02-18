@@ -11,6 +11,7 @@ import argparse
 import pickle
 from sklearn import metrics
 import pandas as pd
+import librosa
 
 import torch
 import torch.nn as nn
@@ -47,6 +48,8 @@ class Predict(object):
         self.is_cuda = torch.cuda.is_available()
         self.build_model()
         self.get_dataset()
+        self.mod = config.mod
+        self.rate = config.rate
 
     def get_model(self):
         if self.model_type == 'fcn':
@@ -123,6 +126,7 @@ class Predict(object):
             filename = self.file_dict[fn]['path']
             npy_path = os.path.join(self.data_path, filename)
         raw = np.load(npy_path, mmap_mode='r')
+        raw = self.modify(raw, self.rate, self.mod)
 
         # split chunk
         length = len(raw)
@@ -131,6 +135,31 @@ class Predict(object):
         for i in range(self.batch_size):
             x[i] = torch.Tensor(raw[i*hop:i*hop+self.input_length]).unsqueeze(0)
         return x
+
+    def modify(self, x, mod_rate, mod_type):
+        if mod_type == 'time_stretch':
+            return self.time_strentch(x, mod_rate)
+        elif mod_type == 'pitch_shift':
+            return self.pitch_shift(x, mod_rate)
+        elif mod_type == 'dynamic_range':
+            return self.dynamic_range(x, mod_rate)
+        elif mod_type == 'white_noise':
+            return self.white_noise(x, mod_rate)
+        else:
+            print('choose from [time_stretch, pitch_shift, dynamic_range, white_noise]')
+
+    def time_stretch(self, x, rate):
+        return librosa.effects.time_stretch(x, rate)
+
+    def pitch_shift(self, x, rate):
+        return librosa.effects.pitch_shift(x, 16000, rate)
+
+    def dynamic_range(self, x, rate):
+        return x * rate
+
+    def white_noise(self, x, rate):
+        noise = np.random.normal(0, 1, len(x))
+        return x + (noise * rate)
 
     def get_auc(self, est_array, gt_array):
         roc_aucs  = metrics.roc_auc_score(gt_array, est_array, average='macro')
@@ -200,6 +229,8 @@ if __name__ == '__main__':
     parser.add_argument('--batch_size', type=int, default=16)
     parser.add_argument('--model_load_path', type=str, default='.')
     parser.add_argument('--data_path', type=str, default='./data')
+    parser.add_argument('--mod', type=str, default='time_stretch')
+    parser.add_argument('--rate', type=float, default=0)
 
     config = parser.parse_args()
 
