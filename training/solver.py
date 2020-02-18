@@ -112,6 +112,8 @@ class Solver(object):
             return Model.SampleCNNSE()
         elif self.model_type == 'boc':
             return Model.BoCCNN()
+        elif self.model_type == 'boc_res':
+            return Model.BoCCNN_Res()
         elif self.model_type == 'attention':
             return Model.CNNSA()
 
