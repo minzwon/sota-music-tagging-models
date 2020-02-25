@@ -116,6 +116,8 @@ class Solver(object):
             return Model.BoCCNN_Res()
         elif self.model_type == 'attention':
             return Model.CNNSA()
+        elif self.model_type == 'hcnn':
+            return Model.HarmonicCNN()
 
     def build_model(self):
         # model
