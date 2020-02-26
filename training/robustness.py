@@ -1,6 +1,13 @@
 # coding: utf-8
+'''
+Deformation codes are borrowed from MUDA
+McFee et al., A software framework for musical data augmentation, 2015
+https://github.com/bmcfee/muda
+'''
 import os
 import time
+import subprocess
+import tempfile
 import numpy as np
 import pandas as pd
 import datetime
@@ -12,6 +19,7 @@ import pickle
 from sklearn import metrics
 import pandas as pd
 import librosa
+import soundfile as psf
 
 import torch
 import torch.nn as nn
@@ -50,7 +58,20 @@ class Predict(object):
         self.get_dataset()
         self.mod = config.mod
         self.rate = config.rate
-
+        self.PRESETS = {
+                        "radio":            ["0.01,1", "-90,-90,-70,-70,-60,-20,0,0", "-5"],
+                        "film standard":    ["0.1,0.3", "-90,-90,-70,-64,-43,-37,-31,-31,-21,-21,0,-20", "0", "0", "0.1"],
+                        "film light":       ["0.1,0.3", "-90,-90,-70,-64,-53,-47,-41,-41,-21,-21,0,-20", "0", "0", "0.1"],
+                        "music standard":   ["0.1,0.3", "-90,-90,-70,-58,-55,-43,-31,-31,-21,-21,0,-20", "0", "0", "0.1"],
+                        "music light":      ["0.1,0.3", "-90,-90,-70,-58,-65,-53,-41,-41,-21,-21,0,-11", "0", "0", "0.1"],
+                        "speech":           ["0.1,0.3", "-90,-90,-70,-55,-50,-35,-31,-31,-21,-21,0,-20", "0", "0", "0.1"]
+                        }
+        self.preset_dict = {1: "radio",
+                            2: "film standard",
+                            3: "film light",
+                            4: "music standard",
+                            5: "music light",
+                            6: "speech"}
     def get_model(self):
         if self.model_type == 'fcn':
             self.input_length = 29 * 16000
@@ -145,24 +166,71 @@ class Predict(object):
         elif mod_type == 'pitch_shift':
             return self.pitch_shift(x, mod_rate)
         elif mod_type == 'dynamic_range':
-            return self.dynamic_range(x, mod_rate)
+            return self.dynamic_range_compression(x, mod_rate)
         elif mod_type == 'white_noise':
             return self.white_noise(x, mod_rate)
         else:
             print('choose from [time_stretch, pitch_shift, dynamic_range, white_noise]')
 
     def time_stretch(self, x, rate):
+        '''
+        [2 ** (-.5), 2 ** (.5)]
+        '''
         return librosa.effects.time_stretch(x, rate)
 
     def pitch_shift(self, x, rate):
+        '''
+        [-1, 1]
+        '''
         return librosa.effects.pitch_shift(x, 16000, rate)
 
-    def dynamic_range(self, x, rate):
-        return x * rate
+    def dynamic_range_compression(self, x, rate):
+        '''
+        [4, 6]
+        Music standard & Speech
+        '''
+        return self.sox(x, 16000, "compand", *self.PRESETS[self.preset_dict[rate]])
+
+    @staticmethod
+    def sox(x, fs, *args):
+        assert fs > 0
+
+        fdesc, infile = tempfile.mkstemp(suffix=".wav")
+        os.close(fdesc)
+        fdesc, outfile = tempfile.mkstemp(suffix=".wav")
+        os.close(fdesc)
+
+        psf.write(infile, x, fs)
+
+        try:
+            arguments = ["sox", infile, outfile, "-q"]
+            arguments.extend(args)
+
+            subprocess.check_call(arguments)
+
+            x_out, fs = psf.read(outfile)
+            x_out = x_out.T
+            if x.ndim == 1:
+                x_out = librosa.to_mono(x_out)
+
+        finally:
+            os.unlink(infile)
+            os.unlink(outfile)
+
+        return x_out
 
     def white_noise(self, x, rate):
-        noise = np.random.normal(0, 1, len(x))
-        return x + (noise * rate)
+        '''
+        [0.1, 0.4]
+        '''
+        n_frames = len(x)
+        noise_white = np.random.RandomState().randn(n_frames)
+        noise_fft = np.fft.rfft(noise_white)
+        values = np.linspace(1, n_frames * 0.5 + 1, n_frames // 2 + 1)
+        colored_filter = np.linspace(1, n_frames / 2 + 1, n_frames // 2 + 1) ** 0
+        noise_filtered = noise_fft * colored_filter
+        noise = librosa.util.normalize(np.fft.irfft(noise_filtered)) * (x.max())
+        return (1 - rate) * x + (noise * rate)
 
     def get_auc(self, est_array, gt_array):
         roc_aucs  = metrics.roc_auc_score(gt_array, est_array, average='macro')
