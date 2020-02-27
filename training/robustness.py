@@ -230,6 +230,8 @@ class Predict(object):
         colored_filter = np.linspace(1, n_frames / 2 + 1, n_frames // 2 + 1) ** 0
         noise_filtered = noise_fft * colored_filter
         noise = librosa.util.normalize(np.fft.irfft(noise_filtered)) * (x.max())
+        if len(noise) < len(x):
+            x = x[:len(noise)]
         return (1 - rate) * x + (noise * rate)
 
     def get_auc(self, est_array, gt_array):
