@@ -136,6 +136,8 @@ class Solver(object):
 
     def load(self, filename):
         S = torch.load(filename)
+        if 'spec.mel_scale.fb' in S.keys():
+            S['spec.mel_scale.fb'] = torch.tensor([])
         self.model.load_state_dict(S)
 
     def to_var(self, x):
