@@ -5,7 +5,7 @@ PyTorch implementation of state-of-the-art music tagging models.
 
 ## Reference
 
-Evaluation of CNN-based Automatic Music Tagging Models, SMC 2020 [[arxiv](http://arxiv.org)]
+**Evaluation of CNN-based Automatic Music Tagging Models**, SMC 2020 [[arxiv](http://arxiv.org)]
 
 -- Minz Won, Andres Ferraro, Dmitry Bogdanov, and Xavier Serra
 
@@ -33,7 +33,7 @@ Evaluation of CNN-based Automatic Music Tagging Models, SMC 2020 [[arxiv](http:/
 
 
 ## Preprocessing
-STFT will be done on-the-fly. You only need to read and resample audio files into `.npy` file. 
+STFT will be done on-the-fly. You only need to read and resample audio files into `.npy` files. 
 
 `cd preprocessing/`
 
@@ -79,5 +79,5 @@ Options
 '--data_path', type=str, default='./data'
 ```
 
-## Upcoming models
+## Upcoming Models
 Available upon request.
