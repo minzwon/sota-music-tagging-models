@@ -303,9 +303,9 @@ class SampleCNNSE(nn.Module):
         return x
 
 
-class BoCCNN(nn.Module):
+class ShortChunkCNN(nn.Module):
     '''
-    Bag-of-chunk CNN architecture, deeper layers, smaller pooling (2x2).
+    Short-chunk CNN architecture, deeper layers, smaller pooling (2x2).
     '''
     def __init__(self,
                 n_channels=128,
@@ -315,7 +315,7 @@ class BoCCNN(nn.Module):
                 f_max=8000.0,
                 n_mels=128,
                 n_class=50):
-        super(BoCCNN, self).__init__()
+        super(ShortChunkCNN, self).__init__()
 
         # Spectrogram
         self.spec = torchaudio.transforms.MelSpectrogram(sample_rate=sample_rate,
@@ -375,9 +375,9 @@ class BoCCNN(nn.Module):
         return x
 
 
-class BoCCNN_Res(nn.Module):
+class ShortChunkCNN_Res(nn.Module):
     '''
-    Bag-of-chunk CNN architecture with residual connections, deeper layers, smaller pooling (2x2).
+    Short-chunk CNN architecture with residual connections, deeper layers, smaller pooling (2x2).
     '''
     def __init__(self,
                 n_channels=128,
@@ -387,7 +387,7 @@ class BoCCNN_Res(nn.Module):
                 f_max=8000.0,
                 n_mels=128,
                 n_class=50):
-        super(BoCCNN_Res, self).__init__()
+        super(ShortChunkCNN_Res, self).__init__()
 
         # Spectrogram
         self.spec = torchaudio.transforms.MelSpectrogram(sample_rate=sample_rate,

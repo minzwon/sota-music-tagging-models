@@ -110,10 +110,10 @@ class Solver(object):
             return Model.SampleCNN()
         elif self.model_type == 'se':
             return Model.SampleCNNSE()
-        elif self.model_type == 'boc':
-            return Model.BoCCNN()
-        elif self.model_type == 'boc_res':
-            return Model.BoCCNN_Res()
+        elif self.model_type == 'short':
+            return Model.ShortChunkCNN()
+        elif self.model_type == 'short_res':
+            return Model.ShortChunkCNN_Res()
         elif self.model_type == 'attention':
             return Model.CNNSA()
         elif self.model_type == 'hcnn':

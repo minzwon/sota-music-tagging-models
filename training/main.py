@@ -20,7 +20,7 @@ def main(config):
         config.input_length = 29 * 16000
     elif config.model_type == 'musicnn':
         config.input_length = 3 * 16000
-    elif config.model_type in ['sample', 'se', 'boc', 'boc_res']:
+    elif config.model_type in ['sample', 'se', 'short', 'short_res']:
         config.input_length = 59049
     elif config.model_type == 'hcnn':
         config.input_length = 80000
@@ -43,7 +43,7 @@ if __name__ == '__main__':
     parser.add_argument('--num_workers', type=int, default=0)
     parser.add_argument('--dataset', type=str, default='mtat', choices=['mtat', 'msd', 'jamendo'])
     parser.add_argument('--model_type', type=str, default='fcn',
-						choices=['fcn', 'musicnn', 'crnn', 'sample', 'se', 'boc', 'boc_res', 'attention', 'hcnn'])
+						choices=['fcn', 'musicnn', 'crnn', 'sample', 'se', 'short', 'short_res', 'attention', 'hcnn'])
     parser.add_argument('--n_epochs', type=int, default=200)
     parser.add_argument('--batch_size', type=int, default=16)
     parser.add_argument('--lr', type=float, default=1e-4)
