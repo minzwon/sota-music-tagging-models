@@ -1,11 +1,11 @@
 # State-of-the-art Music Tagging Models
 
-## Summary
-PyTorch implementation of state-of-the-art music tagging models. 
+
+PyTorch implementation of state-of-the-art music tagging models :robot: :notes:
 
 ## Reference
 
-**Evaluation of CNN-based Automatic Music Tagging Models**, SMC 2020 [[arxiv](http://arxiv.org)]
+**Evaluation of CNN-based Automatic Music Tagging Models**, SMC 2020 [[arxiv](https://arxiv.org/abs/2006.00751)]
 
 -- Minz Won, Andres Ferraro, Dmitry Bogdanov, and Xavier Serra
 
