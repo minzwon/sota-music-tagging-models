@@ -27,6 +27,9 @@ PyTorch implementation of state-of-the-art music tagging models :notes:
 - **CRNN** : Convolutional Recurrent Neural Networks for Music Classification, Choi et al., 2016 [[arxiv](https://arxiv.org/abs/1609.04243)]
 - **Self-attention** : Toward Interpretable Music Tagging with Self-Attention, Won et al., 2019 [[arxiv](https://arxiv.org/abs/1906.04972)]
 - **Harmonic CNN** : Data-Driven Harmonic Filters for Audio Representation Learning, Won et al., 2020 [[pdf](https://ccrma.stanford.edu/~urinieto/MARL/publications/ICASSP2020_Won.pdf)]
+- **Short-chunk CNN** : Prevalent 3x3 CNN. So-called *vgg*-ish model with a small receptieve field.
+- **Short-chunk CNN + Residual** : Short-chunk CNN with residual connections.
+
 
 ## Requirements
 ```
@@ -82,6 +85,12 @@ Options
 '--model_load_path', type=str, default='.'
 '--data_path', type=str, default='./data'
 ```
+
+## Performance Comparison
+<figure><img src="./figs/performance.pdf" width="750"><center><figcaption>Performances of SOTA models.</figcaption></figure></center>
+<img src="./figs/generalization.pdf" width="750"><center><figcaption>Performances with perturbed inputs.</figcaption></figure></center>
+
+
 
 ## Citation
 ```
