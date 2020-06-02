@@ -30,8 +30,8 @@ PyTorch implementation of state-of-the-art music tagging models :notes:
 
 ## Requirements
 ```
-conda create -n NEWNAME python=3.7
-conda activate NEWNAME
+conda create -n YOUR_ENV_NAME python=3.7
+conda activate YOUR_ENV_NAME
 pip install -r requirements.txt
 ```
 
@@ -41,13 +41,13 @@ STFT will be done on-the-fly. You only need to read and resample audio files int
 
 `cd preprocessing/`
 
-`python -u mtat_read.py run`
+`python -u mtat_read.py run YOUR_DATA_PATH`
 
 ## Training
 
 `cd training/`
 
-`python -u main.py`
+`python -u main.py --data_path YOUR_DATA_PATH`
 
 Options
 
@@ -69,7 +69,7 @@ Options
 ## Evaluation
 `cd training/`
 
-`python -u eval.py`
+`python -u eval.py --data_path YOUR_DATA_PATH`
 
 Options
 
@@ -82,6 +82,22 @@ Options
 '--model_load_path', type=str, default='.'
 '--data_path', type=str, default='./data'
 ```
+
+## Citation
+```
+@inproceedings{won2020eval,
+  title={Evaluation of CNN-based automatic music tagging models},
+  author={Won, Minz and Ferraro, Andres and Bogdanov, Dmitry and Serra, Xavier},
+  booktitle={Proc. of 17th Sound and Music Computing},
+  year={2020}
+}
+```
+
+## License
+```
+To be updated.
+```
+
 
 ## Upcoming Models
 Available upon request.
