@@ -305,7 +305,9 @@ class SampleCNNSE(nn.Module):
 
 class ShortChunkCNN(nn.Module):
     '''
-    Short-chunk CNN architecture, deeper layers, smaller pooling (2x2).
+    Short-chunk CNN architecture.
+    So-called vgg-ish model with a small receptive field.
+    Deeper layers, smaller pooling (2x2).
     '''
     def __init__(self,
                 n_channels=128,
@@ -377,7 +379,7 @@ class ShortChunkCNN(nn.Module):
 
 class ShortChunkCNN_Res(nn.Module):
     '''
-    Short-chunk CNN architecture with residual connections, deeper layers, smaller pooling (2x2).
+    Short-chunk CNN architecture with residual connections.
     '''
     def __init__(self,
                 n_channels=128,
@@ -550,7 +552,7 @@ class HarmonicCNN(nn.Module):
     '''
     Won et al. 2020
     Data-driven harmonic filters for audio representation learning.
-    Trainable harmonic band-pass filters, bag-of-chunk CNN.
+    Trainable harmonic band-pass filters, short-chunk CNN.
     '''
     def __init__(self,
                 n_channels=128,
