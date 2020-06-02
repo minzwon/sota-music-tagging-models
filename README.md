@@ -87,8 +87,8 @@ Options
 ```
 
 ## Performance Comparison
-<figure><img src="./figs/performance.pdf" width="750"><center><figcaption>Performances of SOTA models.</figcaption></figure></center>
-<img src="./figs/generalization.pdf" width="750"><center><figcaption>Performances with perturbed inputs.</figcaption></figure></center>
+<figure><img src="figs/performance.pdf" width="750"><center><figcaption>Performances of SOTA models.</figcaption></figure></center>
+<img src="figs/generalization.pdf" width="750"><center><figcaption>Performances with perturbed inputs.</figcaption></figure></center>
 
 
 
