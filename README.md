@@ -29,7 +29,11 @@ PyTorch implementation of state-of-the-art music tagging models :notes:
 - **Harmonic CNN** : Data-Driven Harmonic Filters for Audio Representation Learning, Won et al., 2020 [[pdf](https://ccrma.stanford.edu/~urinieto/MARL/publications/ICASSP2020_Won.pdf)]
 
 ## Requirements
-`pip install -r requirements.txt`
+```
+conda create -n NEWNAME python=3.7
+conda activate NEWNAME
+pip install -r requirements.txt
+```
 
 
 ## Preprocessing

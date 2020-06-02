@@ -1,6 +1,7 @@
 audioread==2.1.8
 essentia==2.1b6.dev184
 fire==0.2.1
+grpcio==1.25.0
 h5py==2.10.0
 librosa==0.7.2
 llvmlite==0.31.0
