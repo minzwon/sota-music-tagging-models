@@ -13,7 +13,7 @@ PyTorch implementation of state-of-the-art music tagging models :notes:
 **TL;DR**
 
 - If your dataset is relatively small: take advantage of domain knowledge using Musicnn.
-- If you want a simple but the best performing model: Short-chunk CNN with Residual connention (so-called *vgg*-ish model with a small receptieve field)
+- If you want a simple but the best performing model: Short-chunk CNN with Residual connention (so-called *vgg*-ish model with a small receptive field)
 - If you want the best performance with generalization ability: Harmonic CNN
 
 
