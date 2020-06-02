@@ -1,7 +1,7 @@
 # State-of-the-art Music Tagging Models
 
 
-PyTorch implementation of state-of-the-art music tagging models :robot: :notes:
+PyTorch implementation of state-of-the-art music tagging models :notes:
 
 ## Reference
 
