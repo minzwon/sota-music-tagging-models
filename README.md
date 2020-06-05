@@ -1,5 +1,5 @@
 # State-of-the-art Music Tagging Models
-
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 PyTorch implementation of state-of-the-art music tagging models :notes:
 
