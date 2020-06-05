@@ -1,7 +1,7 @@
 import os
 import numpy as np
 import glob
-from essentia.standard import MonoLoader
+import librosa
 import fire
 import tqdm
 
@@ -17,8 +17,7 @@ class Processor:
 			os.makedirs(self.npy_path)
 
 	def get_npy(self, fn):
-		loader = MonoLoader(filename=fn, sampleRate=self.fs)
-		x = loader()
+                x, sr = librosa.core.load(fn, sr=self.fs)
 		return x
 
 	def iterate(self, data_path):
