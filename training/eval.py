@@ -107,6 +107,8 @@ class Predict(object):
 
     def load(self, filename):
         S = torch.load(filename)
+        if 'spec.mel_scale.fb' in S.keys():
+            self.model.spec.mel_scale.fb = S['spec.mel_scale.fb']
         self.model.load_state_dict(S)
 
     def to_var(self, x):
