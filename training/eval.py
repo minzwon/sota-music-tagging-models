@@ -64,20 +64,20 @@ class Predict(object):
         elif self.model_type == 'se':
             self.input_length = 59049
             return Model.SampleCNNSE()
-        elif self.model_type == 'boc':
-            self.input_length = 59049
-            return Model.BoCCNN()
-        elif self.model_type == 'boc_res':
-            self.input_length = 59049
-            return Model.BoCCNN_Res()
         elif self.model_type == 'attention':
             self.input_length = 15 * 16000
             return Model.CNNSA()
         elif self.model_type == 'hcnn':
             self.input_length = 5 * 16000
             return Model.HarmonicCNN()
+        elif self.model_type == 'short':
+            self.input_length = 59049
+            return Model.ShortChunkCNN()
+        elif self.model_type == 'short_res':
+            self.input_length = 59049
+            return Model.ShortChunkCNN_Res()
         else:
-            print('model_type has to be one of [fcn, musicnn, crnn, sample, se, boc, boc_res, attention]')
+            print('model_type has to be one of [fcn, musicnn, crnn, sample, se, short, short_res, attention]')
 
     def build_model(self):
         self.model = self.get_model()
