@@ -1,8 +1,5 @@
-model: "cog_predict.py:Model"
-workdir: training
-environment:
-  architectures:
-    - cpu
+predict: "predict.py:Predictor"
+build:
   python_version: "3.7"
   python_packages:
     - "audioread==2.1.8"
@@ -32,35 +29,3 @@ environment:
     - "libblas-dev"
     - "liblapack-dev"
     - "ffmpeg"
-examples:
-  - input:
-      input: "@examples/Avenger_Kills_-_The_End_Has_Come.mp3"
-      variant: "Self-attention"
-  - input:
-      input: "@examples/Avenger_Kills_-_The_End_Has_Come.mp3"
-      variant: "CRNN"
-  - input:
-      input: "@examples/Avenger_Kills_-_The_End_Has_Come.mp3"
-      variant: "FCN"
-  - input:
-      input: "@examples/Avenger_Kills_-_The_End_Has_Come.mp3"
-      variant: "Harmonic CNN"
-  - input:
-      input: "@examples/Avenger_Kills_-_The_End_Has_Come.mp3"
-      variant: "MusicNN"
-  - input:
-      input: "@examples/Avenger_Kills_-_The_End_Has_Come.mp3"
-      variant: "Sample-level CNN"
-  - input:
-      input: "@examples/Avenger_Kills_-_The_End_Has_Come.mp3"
-      variant: "Sample-level CNN + Squeeze-and-excitation"
-  - input:
-      input: "@examples/Alfonso_Lugo_-_Chocolate.mp3"
-      variant: "Harmonic CNN"
-  - input:
-      input: "@examples/Alfonso_Lugo_-_Chocolate.mp3"
-      variant: "FCN"
-  - input:
-      input: "@examples/Avenger_Kills_-_The_End_Has_Come.mp3"
-      variant: "CRNN"
-      output_format: "JSON"

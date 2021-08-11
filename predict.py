@@ -1,3 +1,4 @@
+import sys
 import tempfile
 from pathlib import Path
 import os
@@ -7,6 +8,8 @@ import numpy as np
 from torch.autograd import Variable
 import matplotlib.pyplot as plt
 import cog
+
+sys.path.insert(0, "training")
 
 import model
 
@@ -23,7 +26,7 @@ MODEL_NAMES = {
 }
 
 
-class Model(cog.Model):
+class Predictor(cog.Predictor):
     def setup(self):
         if torch.cuda.is_available():
             self.device = torch.device("cuda:0")
@@ -50,13 +53,13 @@ class Model(cog.Model):
         }
 
         for key, mod in self.models.items():
-            filename = os.path.join("..", "models", DATASET, key, "best_model.pth")
+            filename = os.path.join("models", DATASET, key, "best_model.pth")
             state_dict = torch.load(filename, map_location=self.device)
             if "spec.mel_scale.fb" in state_dict.keys():
                 mod.spec.mel_scale.fb = state_dict["spec.mel_scale.fb"]
             mod.load_state_dict(state_dict)
 
-        self.tags = np.load("../split/mtat/tags.npy")
+        self.tags = np.load("split/mtat/tags.npy")
 
     @cog.input("input", type=Path, help="Input audio file")
     @cog.input(

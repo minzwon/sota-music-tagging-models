@@ -2,6 +2,3 @@
 __pycache__/
 training/models/
 training/runs/
-.cog
-.DS_Store
-.mypy_cache
