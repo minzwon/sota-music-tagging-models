@@ -3,6 +3,8 @@
 
 PyTorch implementation of state-of-the-art music tagging models :notes:
 
+[Demo and Docker image on Replicate](https://replicate.ai/user/repo)
+
 ## Reference
 
 **Evaluation of CNN-based Automatic Music Tagging Models**, SMC 2020 [[arxiv](https://arxiv.org/abs/2006.00751)]
