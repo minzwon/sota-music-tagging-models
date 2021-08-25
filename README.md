@@ -3,7 +3,7 @@
 
 PyTorch implementation of state-of-the-art music tagging models :notes:
 
-[Demo and Docker image on Replicate](https://replicate.ai/user/repo)
+[Demo and Docker image on Replicate](https://replicate.ai/minzwon/sota-music-tagging-models)
 
 ## Reference
 
