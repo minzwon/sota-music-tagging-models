@@ -17,7 +17,7 @@ class Processor:
 			os.makedirs(self.npy_path)
 
 	def get_npy(self, fn):
-                x, sr = librosa.core.load(fn, sr=self.fs)
+		x, sr = librosa.core.load(fn, sr=self.fs)
 		return x
 
 	def iterate(self, data_path):
