@@ -1,13 +1,14 @@
+import os
 import sys
 import tempfile
 from pathlib import Path
-import os
-import torch
-import librosa
-import numpy as np
-from torch.autograd import Variable
-import matplotlib.pyplot as plt
+
 import cog
+import librosa
+import matplotlib.pyplot as plt
+import numpy as np
+import torch
+from torch.autograd import Variable
 
 sys.path.insert(0, "training")
 

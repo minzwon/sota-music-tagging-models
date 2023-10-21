@@ -1,7 +1,9 @@
 # coding: utf-8
 import os
+
 import numpy as np
 from torch.utils import data
+
 
 class AudioFolder(data.Dataset):
 	def __init__(self, root, split, input_length=None):

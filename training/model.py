@@ -2,12 +2,10 @@
 import numpy as np
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-from torch.autograd import Variable
 import torchaudio
-
-from modules import Conv_1d, ResSE_1d, Conv_2d, Res_2d, Conv_V, Conv_H, HarmonicSTFT, Res_2d_mp
-from attention_modules import BertConfig, BertEncoder, BertEmbeddings, BertPooler, PositionalEncoding
+from attention_modules import BertConfig, BertEncoder, BertPooler
+from modules import (Conv_1d, Conv_2d, Conv_H, Conv_V, HarmonicSTFT, Res_2d,
+                     Res_2d_mp, ResSE_1d)
 
 
 class FCN(nn.Module):

@@ -1,6 +1,8 @@
-import os
 import argparse
+import os
+
 from solver import Solver
+
 
 def main(config):
     # path for models

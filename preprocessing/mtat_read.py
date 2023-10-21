@@ -1,8 +1,9 @@
-import os
-import numpy as np
 import glob
-import librosa
+import os
+
 import fire
+import librosa
+import numpy as np
 import tqdm
 
 
@@ -17,7 +18,7 @@ class Processor:
 			os.makedirs(self.npy_path)
 
 	def get_npy(self, fn):
-                x, sr = librosa.core.load(fn, sr=self.fs)
+		x, sr = librosa.core.load(fn, sr=self.fs)
 		return x
 
 	def iterate(self, data_path):

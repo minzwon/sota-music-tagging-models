@@ -1,11 +1,13 @@
 # coding: utf-8
 # Code adopted from https://github.com/huggingface/pytorch-pretrained-BERT
 
-import math
 import copy
+import math
+
+import numpy as np
 import torch
 import torch.nn as nn
-import numpy as np
+
 
 # Gelu
 def gelu(x):
@@ -18,7 +20,8 @@ def gelu(x):
 
 # LayerNorm
 try:
-    from apex.normalization.fused_layer_norm import FusedLayerNorm as BertLayerNorm
+    from apex.normalization.fused_layer_norm import \
+        FusedLayerNorm as BertLayerNorm
 except ImportError:
 #print("Better speed can be achieved with apex installed from https://www.github.com/nvidia/apex.")
     class BertLayerNorm(nn.Module):

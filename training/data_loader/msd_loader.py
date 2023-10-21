@@ -1,6 +1,7 @@
 # coding: utf-8
-import pickle
 import os
+import pickle
+
 import numpy as np
 from torch.utils import data
 

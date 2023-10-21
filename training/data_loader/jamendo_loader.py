@@ -1,10 +1,10 @@
 # coding: utf-8
-import pickle
-import os
 import csv
+import os
+
 import numpy as np
-from torch.utils import data
 from sklearn.preprocessing import LabelBinarizer
+from torch.utils import data
 
 META_PATH = './../split/mtg-jamendo/'
 
