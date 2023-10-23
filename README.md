@@ -1,4 +1,5 @@
 # State-of-the-art Music Tagging Models
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 PyTorch implementation of state-of-the-art music tagging models :notes:
@@ -11,17 +12,14 @@ PyTorch implementation of state-of-the-art music tagging models :notes:
 
 -- Minz Won, Andres Ferraro, Dmitry Bogdanov, and Xavier Serra
 
-
 **TL;DR**
 
 - If your dataset is relatively small: take advantage of domain knowledge using Musicnn.
-- If you want a simple but the best performing model: Short-chunk CNN with Residual connection (so-called *vgg*-ish model with a small receptive field)
+- If you want a simple but the best performing model: Short-chunk CNN with Residual connection (so-called _vgg_-ish model with a small receptive field)
 - If you want the best performance with generalization ability: Harmonic CNN
 
-
-
-
 ## Available Models
+
 - **FCN** : Automatic Tagging using Deep Convolutional Neural Networks, Choi et al., 2016 [[arxiv](https://arxiv.org/abs/1606.00298)]
 - **Musicnn** : End-to-end Learning for Music Audio Tagging at Scale, Pons et al., 2018 [[arxiv](https://arxiv.org/abs/1711.02520)]
 - **Sample-level CNN** : Sample-level Deep Convolutional Neural Networks for Music Auto-tagging Using Raw Waveforms, Lee et al., 2017 [[arxiv](https://arxiv.org/abs/1703.01789)]
@@ -29,30 +27,26 @@ PyTorch implementation of state-of-the-art music tagging models :notes:
 - **CRNN** : Convolutional Recurrent Neural Networks for Music Classification, Choi et al., 2016 [[arxiv](https://arxiv.org/abs/1609.04243)]
 - **Self-attention** : Toward Interpretable Music Tagging with Self-Attention, Won et al., 2019 [[arxiv](https://arxiv.org/abs/1906.04972)]
 - **Harmonic CNN** : Data-Driven Harmonic Filters for Audio Representation Learning, Won et al., 2020 [[pdf](https://ccrma.stanford.edu/~urinieto/MARL/publications/ICASSP2020_Won.pdf)]
-- **Short-chunk CNN** : Prevalent 3x3 CNN. So-called *vgg*-ish model with a small receptieve field.
+- **Short-chunk CNN** : Prevalent 3x3 CNN. So-called _vgg_-ish model with a small receptieve field.
 - **Short-chunk CNN + Residual** : Short-chunk CNN with residual connections.
 
-
 ## Requirements
+
 ```
 conda create -n YOUR_ENV_NAME python=3.7
 conda activate YOUR_ENV_NAME
 pip install -r requirements.txt
 ```
 
-
 ## Preprocessing
-STFT will be done on-the-fly. You only need to read and resample audio files into `.npy` files. 
 
-`cd preprocessing/`
+STFT will be done on-the-fly. You only need to read and resample audio files into `.npy` files.
 
-`python -u mtat_read.py run YOUR_DATA_PATH`
+`python3 preprocessing/read.py run YOUR_DATA_PATH`
 
 ## Training
 
-`cd training/`
-
-`python -u main.py --data_path YOUR_DATA_PATH`
+`python3 training/main.py --data_path YOUR_DATA_PATH`
 
 Options
 
@@ -72,9 +66,8 @@ Options
 ```
 
 ## Evaluation
-`cd training/`
 
-`python -u eval.py --data_path YOUR_DATA_PATH`
+`python3 training/eval.py --data_path YOUR_DATA_PATH`
 
 Options
 
@@ -89,6 +82,7 @@ Options
 ```
 
 ## Performance Comparison
+
 Performances of SOTA models
 
 <figure><img src="figs/performance.png" width="550">
@@ -97,9 +91,8 @@ Performances with perturbed inputs
 
 <img src="figs/generalization.png" width="550">
 
-
-
 ## Citation
+
 ```
 @inproceedings{won2020eval,
   title={Evaluation of CNN-based automatic music tagging models},
@@ -110,6 +103,7 @@ Performances with perturbed inputs
 ```
 
 ## License
+
 ```
 MIT License
 
@@ -134,8 +128,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-
 ## Upcoming Models
+
 Available upon request.
 
 minz.won@upf.edu
