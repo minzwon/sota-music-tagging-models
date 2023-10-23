@@ -15,21 +15,16 @@ class Processor:
             paths += list(data_dir.rglob(f"*.{ext}"))
         return paths
 
-    def run(
-        self, data_dir: str, npy_dir: str | None = None, sample_rate: float = 16000
-    ):
+    def run(self, data_dir: str, sample_rate: float = 16000):
         """Convert audo files to .npy format
 
         Args:
             data_dir (str): Directory of audio files to convert
-            npy_dir (str | None, optional): Output directory of .npy files. Defaults to data_dir/npy.
             sample_rate (float, optional): Sample rate of .npy files. Defaults to 16000.
         """
         # create npy dir
         data_dir: Path = Path(data_dir)
-        if npy_dir is None:
-            npy_dir = data_dir / "npy"
-        npy_dir: Path = Path(npy_dir)
+        npy_dir = data_dir / "npy"
         npy_dir.mkdir(parents=True, exist_ok=True)
         # convert files to npy
         for audio_file in tqdm.tqdm(self._get_paths(data_dir)):
