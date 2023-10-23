@@ -5,9 +5,7 @@ McFee et al., A software framework for musical data augmentation, 2015
 https://github.com/bmcfee/muda
 """
 import argparse
-import csv
 import os
-import pickle
 import subprocess
 import tempfile
 
@@ -19,7 +17,6 @@ import torch
 import torch.nn as nn
 import tqdm
 from sklearn import metrics
-from sklearn.preprocessing import LabelBinarizer
 from torch.autograd import Variable
 
 from training.datasets import SplitType, get_dataset
