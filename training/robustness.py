@@ -16,10 +16,9 @@ import soundfile as psf
 import torch
 import torch.nn as nn
 import tqdm
+from datasets import SplitType, get_dataset
 from sklearn import metrics
 from torch.autograd import Variable
-
-from training.datasets import SplitType, get_dataset
 
 
 class Predict(object):
@@ -88,41 +87,11 @@ class Predict(object):
             SplitType.TEST,
         )
 
-    def get_model(self):
-        if self.model_type == "fcn":
-            self.input_length = 29 * 16000
-            return Model.FCN()
-        elif self.model_type == "musicnn":
-            self.input_length = 3 * 16000
-            return Model.Musicnn(dataset=self.dataset_name)
-        elif self.model_type == "crnn":
-            self.input_length = 29 * 16000
-            return Model.CRNN()
-        elif self.model_type == "sample":
-            self.input_length = 59049
-            return Model.SampleCNN()
-        elif self.model_type == "se":
-            self.input_length = 59049
-            return Model.SampleCNNSE()
-        elif self.model_type == "short":
-            self.input_length = 59049
-            return Model.ShortChunkCNN()
-        elif self.model_type == "short_res":
-            self.input_length = 59049
-            return Model.ShortChunkCNN_Res()
-        elif self.model_type == "attention":
-            self.input_length = 15 * 16000
-            return Model.CNNSA()
-        elif self.model_type == "hcnn":
-            self.input_length = 5 * 16000
-            return Model.HarmonicCNN()
-        else:
-            print(
-                "model_type has to be one of [fcn, musicnn, crnn, sample, se, short, short_res, attention]"
-            )
-
     def build_model(self):
-        self.model = self.get_model()
+        # model
+        self.model, self.input_length = Model.get_model(
+            self.model_type, self.dataset_name
+        )
 
         # cuda
         if self.is_cuda:

@@ -1,6 +1,5 @@
 # coding: utf-8
 import datetime
-import os
 import time
 
 import model as Model
@@ -8,12 +7,11 @@ import numpy as np
 import torch
 import torch.nn as nn
 import tqdm
+from datasets import SplitType, get_dataset
 from sklearn import metrics
 from torch.autograd import Variable
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
-
-from training.datasets import SplitType, get_dataset
 
 
 class Solver(object):
@@ -21,26 +19,6 @@ class Solver(object):
         # data loader
         self.data_path = config.data_path
         self.dataset_name = config.dataset
-        self.dataset = get_dataset(
-            config.dataset,
-            config.data_path,
-            config.input_length,
-            config.batch_size,
-            SplitType.VALIDATE,
-        )
-        self.data_loader = DataLoader(
-            dataset=get_dataset(
-                config.dataset,
-                config.data_path,
-                config.input_length,
-                config.batch_size,
-                SplitType.TRAIN,
-            ),
-            batch_size=config.batch_size,
-            shuffle=True,
-            drop_last=False,
-            num_workers=config.num_workers,
-        )
 
         # training settings
         self.n_epochs = config.n_epochs
@@ -50,50 +28,56 @@ class Solver(object):
         # model path and step size
         self.model_save_path = config.model_save_path
         self.model_load_path = config.model_load_path
+        self.load_model = config.load_model
         self.log_step = config.log_step
         self.batch_size = config.batch_size
         self.model_type = config.model_type
 
         # cuda
         self.is_cuda = torch.cuda.is_available()
-
         # Build model
         self.build_model()
 
         # Tensorboard
         self.writer = SummaryWriter()
 
-    def get_model(self):
-        if self.model_type == "fcn":
-            return Model.FCN()
-        elif self.model_type == "musicnn":
-            return Model.Musicnn(dataset=self.dataset_name)
-        elif self.model_type == "crnn":
-            return Model.CRNN()
-        elif self.model_type == "sample":
-            return Model.SampleCNN()
-        elif self.model_type == "se":
-            return Model.SampleCNNSE()
-        elif self.model_type == "short":
-            return Model.ShortChunkCNN()
-        elif self.model_type == "short_res":
-            return Model.ShortChunkCNN_Res()
-        elif self.model_type == "attention":
-            return Model.CNNSA()
-        elif self.model_type == "hcnn":
-            return Model.HarmonicCNN()
+        self.dataset = get_dataset(
+            config.dataset,
+            config.data_path,
+            self.input_length,
+            config.batch_size,
+            SplitType.VALIDATE,
+        )
+        self.data_loader = DataLoader(
+            dataset=get_dataset(
+                config.dataset,
+                config.data_path,
+                self.input_length,
+                config.batch_size,
+                SplitType.TRAIN,
+            ),
+            batch_size=config.batch_size,
+            shuffle=True,
+            drop_last=False,
+            num_workers=config.num_workers,
+        )
 
     def build_model(self):
         # model
-        self.model = self.get_model()
+        self.model, self.input_length = Model.get_model(
+            self.model_type, self.dataset_name
+        )
 
         # cuda
         if self.is_cuda:
             self.model.cuda()
 
         # load pretrained model
-        if len(self.model_load_path) > 1:
-            self.load(self.model_load_path)
+        if self.load_model != 0:
+            if self.model_load_path.exists():
+                self.load(self.model_load_path)
+            else:
+                print(f"Could not load model from '{self.model_load_path}'")
 
         # optimizers
         self.optimizer = torch.optim.Adam(
@@ -163,7 +147,7 @@ class Solver(object):
     def opt_schedule(self, current_optimizer, drop_counter):
         # adam to sgd
         if current_optimizer == "adam" and drop_counter == 80:
-            self.load(os.path.join(self.model_save_path, "best_model.pth"))
+            self.load(self.model_save_path)
             self.optimizer = torch.optim.SGD(
                 self.model.parameters(),
                 0.001,
@@ -176,7 +160,7 @@ class Solver(object):
             print("sgd 1e-3")
         # first drop
         if current_optimizer == "sgd_1" and drop_counter == 20:
-            self.load(os.path.join(self.model_save_path, "best_model.pth"))
+            self.load(self.model_save_path)
             for pg in self.optimizer.param_groups:
                 pg["lr"] = 0.0001
             current_optimizer = "sgd_2"
@@ -184,7 +168,7 @@ class Solver(object):
             print("sgd 1e-4")
         # second drop
         if current_optimizer == "sgd_2" and drop_counter == 20:
-            self.load(os.path.join(self.model_save_path, "best_model.pth"))
+            self.load(self.model_save_path)
             for pg in self.optimizer.param_groups:
                 pg["lr"] = 0.00001
             current_optimizer = "sgd_3"
@@ -225,7 +209,7 @@ class Solver(object):
             best_metric = score
             torch.save(
                 self.model.state_dict(),
-                os.path.join(self.model_save_path, "best_model.pth"),
+                self.model_save_path,
             )
         return best_metric
 

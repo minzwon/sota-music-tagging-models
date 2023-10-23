@@ -8,7 +8,6 @@ import numpy as np
 import torch
 from sklearn.naive_bayes import LabelBinarizer
 from torch import Tensor
-from torch.utils.data import DataLoader
 from torch.utils.data import Dataset as TorchDataset
 
 
@@ -66,17 +65,6 @@ class Dataset(ABC, TorchDataset):
 
     def __len__(self):
         return len(self.data_list)
-
-    def get_audio_loader(
-        self, root, batch_size, split="TRAIN", num_workers=0, input_length=None
-    ) -> DataLoader:
-        return DataLoader(
-            dataset=self.AudioFolder(root, split=split, input_length=input_length),
-            batch_size=batch_size,
-            shuffle=True,
-            drop_last=False,
-            num_workers=num_workers,
-        )
 
 
 SOURCE_DIR = Path(__file__).parent.parent
@@ -186,7 +174,7 @@ class MTaTDataset(Dataset):
 
     def get_npy_path(self, data) -> Path:
         _, name = data.split("\t")
-        return Path(self.data_path) / "npy" / Path(name).with_suffix("npy").name
+        return Path(self.data_path) / "npy" / Path(name).with_suffix(".npy").name
 
     def get_ground_truth(self, data) -> np.ndarray:
         ix, _ = data.split("\t")
@@ -275,20 +263,6 @@ class MSDDataset(Dataset):
         with id2tag_file.open("rb") as f:
             self.id2tag = pickle.load(f, encoding="bytes")
 
-    def load_validation_dataset(self) -> None:
-        train_file = SOURCE_DIR / "split/msd/filtered_list_train.cP"
-        with train_file.open("rb") as f:
-            train_list = pickle.load(f, encoding="bytes")
-        val_set = train_list[201680:]
-        self.data_list = [
-            value.decode()
-            for value in val_set
-            if value.decode() not in MSDDataset.SKIP_FILES
-        ]
-        id2tag_file = SOURCE_DIR / "split/msd/msd_id_to_tag_vector.cP"
-        with id2tag_file.open("rb") as f:
-            self.id2tag = pickle.load(f, encoding="bytes")
-
     def get_npy_path(self, data) -> Path:
         filename = f"{data[2]}/{data[3]}/{data[4]}/{data}.npy"
         return Path(self.data_path) / "npy" / filename
@@ -297,7 +271,53 @@ class MSDDataset(Dataset):
         return self.id2tag[data].flatten()
 
 
-DATASETS = {"mtat": MTaTDataset, "msd": MSDDataset, "jamendo": MTGJamendoDataset}
+class GTZANDataset(Dataset):
+    SKIP_FILES = {"jazz/jazz.00054.wav"}
+
+    def load_dataset(self, split: SplitType) -> None:
+        match split:
+            case SplitType.TEST:
+                file = SOURCE_DIR / "split/gtzan/test_filtered.txt"
+            case SplitType.TRAIN:
+                file = SOURCE_DIR / "split/gtzan/train_filtered.txt"
+            case SplitType.VALIDATE:
+                file = SOURCE_DIR / "split/gtzan/valid_filtered.txt"
+
+        self.data_list = []
+        with file.open("r") as f:
+            for line in f:
+                path = line.strip()
+                if path not in self.SKIP_FILES:
+                    self.data_list.append(path)
+
+    def get_npy_path(self, data: str) -> Path:
+        return (Path(self.data_path) / "npy/genres" / data).with_suffix(".npy")
+
+    def get_ground_truth(self, data: str) -> np.ndarray:
+        genres = np.zeros(10)
+        genre_to_idx = {
+            "blues": 0,
+            "classical": 1,
+            "country": 2,
+            "disco": 3,
+            "hiphop": 4,
+            "jazz": 5,
+            "metal": 6,
+            "pop": 7,
+            "reggae": 8,
+            "rock": 9,
+        }
+        genre = data.split("/")[0]
+        genres[genre_to_idx[genre]] = 1
+        return genres
+
+
+DATASETS = {
+    "mtat": MTaTDataset,
+    "msd": MSDDataset,
+    "jamendo": MTGJamendoDataset,
+    "gtzan": GTZANDataset,
+}
 
 
 def get_dataset(

@@ -4,16 +4,8 @@ import torch
 import torch.nn as nn
 import torchaudio
 from attention_modules import BertConfig, BertEncoder, BertPooler
-from modules import (
-    Conv_1d,
-    Conv_2d,
-    Conv_H,
-    Conv_V,
-    HarmonicSTFT,
-    Res_2d,
-    Res_2d_mp,
-    ResSE_1d,
-)
+from modules import (Conv_1d, Conv_2d, Conv_H, Conv_V, HarmonicSTFT, Res_2d,
+                     Res_2d_mp, ResSE_1d)
 
 
 class FCN(nn.Module):
@@ -662,3 +654,37 @@ class HarmonicCNN(nn.Module):
         x = nn.Sigmoid()(x)
 
         return x
+
+
+def get_model(name: str, dataset: str) -> tuple[nn.Module, int]:
+    n_class = 50 if dataset != "gtzan" else 10
+    match name:
+        case "fcn":
+            model = FCN(n_class=n_class)
+            input_length = 29 * 16000
+        case "musicnn":
+            model = Musicnn(dataset=dataset, n_class=n_class)
+            input_length = 3 * 16000
+        case "crnn":
+            model = CRNN(n_class=n_class)
+            input_length = 29 * 16000
+        case "sample":
+            model = SampleCNN(n_class=n_class)
+            input_length = 59049
+        case "se":
+            model = SampleCNNSE(n_class=n_class)
+            input_length = 59049
+        case "short":
+            model = ShortChunkCNN(n_class=n_class)
+            input_length = 59049
+        case "short_res":
+            model = ShortChunkCNN_Res(n_class=n_class)
+            input_length = 59049
+        case "attention":
+            model = CNNSA(n_class=n_class)
+            input_length = 15 * 16000
+        case "hcnn":
+            model = HarmonicCNN(n_class=n_class)
+            input_length = 80000
+
+    return model, input_length

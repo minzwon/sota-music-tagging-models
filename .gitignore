@@ -3,3 +3,4 @@ __pycache__/
 training/models/
 training/runs/
 .venv
+runs
