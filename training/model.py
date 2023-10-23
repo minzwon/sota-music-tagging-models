@@ -4,40 +4,53 @@ import torch
 import torch.nn as nn
 import torchaudio
 from attention_modules import BertConfig, BertEncoder, BertPooler
-from modules import (Conv_1d, Conv_2d, Conv_H, Conv_V, HarmonicSTFT, Res_2d,
-                     Res_2d_mp, ResSE_1d)
+from modules import (
+    Conv_1d,
+    Conv_2d,
+    Conv_H,
+    Conv_V,
+    HarmonicSTFT,
+    Res_2d,
+    Res_2d_mp,
+    ResSE_1d,
+)
 
 
 class FCN(nn.Module):
-    '''
+    """
     Choi et al. 2016
     Automatic tagging using deep convolutional neural networks.
     Fully convolutional network.
-    '''
-    def __init__(self,
-                sample_rate=16000,
-                n_fft=512,
-                f_min=0.0,
-                f_max=8000.0,
-                n_mels=96,
-                n_class=50):
+    """
+
+    def __init__(
+        self,
+        sample_rate=16000,
+        n_fft=512,
+        f_min=0.0,
+        f_max=8000.0,
+        n_mels=96,
+        n_class=50,
+    ):
         super(FCN, self).__init__()
 
         # Spectrogram
-        self.spec = torchaudio.transforms.MelSpectrogram(sample_rate=sample_rate,
-                                                         n_fft=n_fft,
-                                                         f_min=f_min,
-                                                         f_max=f_max,
-                                                         n_mels=n_mels)
+        self.spec = torchaudio.transforms.MelSpectrogram(
+            sample_rate=sample_rate,
+            n_fft=n_fft,
+            f_min=f_min,
+            f_max=f_max,
+            n_mels=n_mels,
+        )
         self.to_db = torchaudio.transforms.AmplitudeToDB()
         self.spec_bn = nn.BatchNorm2d(1)
 
         # FCN
-        self.layer1 = Conv_2d(1, 64, pooling=(2,4))
-        self.layer2 = Conv_2d(64, 128, pooling=(2,4))
-        self.layer3 = Conv_2d(128, 128, pooling=(2,4))
-        self.layer4 = Conv_2d(128, 128, pooling=(3,5))
-        self.layer5 = Conv_2d(128, 64, pooling=(4,4))
+        self.layer1 = Conv_2d(1, 64, pooling=(2, 4))
+        self.layer2 = Conv_2d(64, 128, pooling=(2, 4))
+        self.layer3 = Conv_2d(128, 128, pooling=(2, 4))
+        self.layer4 = Conv_2d(128, 128, pooling=(3, 5))
+        self.layer5 = Conv_2d(128, 64, pooling=(4, 4))
 
         # Dense
         self.dense = nn.Linear(64, n_class)
@@ -67,48 +80,53 @@ class FCN(nn.Module):
 
 
 class Musicnn(nn.Module):
-    '''
+    """
     Pons et al. 2017
     End-to-end learning for music audio tagging at scale.
     This is the updated implementation of the original paper. Referred to the Musicnn code.
     https://github.com/jordipons/musicnn
-    '''
-    def __init__(self,
-                sample_rate=16000,
-                n_fft=512,
-                f_min=0.0,
-                f_max=8000.0,
-                n_mels=96,
-                n_class=50,
-                dataset='mtat'):
+    """
+
+    def __init__(
+        self,
+        sample_rate=16000,
+        n_fft=512,
+        f_min=0.0,
+        f_max=8000.0,
+        n_mels=96,
+        n_class=50,
+        dataset="mtat",
+    ):
         super(Musicnn, self).__init__()
 
         # Spectrogram
-        self.spec = torchaudio.transforms.MelSpectrogram(sample_rate=sample_rate,
-                                                         n_fft=n_fft,
-                                                         f_min=f_min,
-                                                         f_max=f_max,
-                                                         n_mels=n_mels)
+        self.spec = torchaudio.transforms.MelSpectrogram(
+            sample_rate=sample_rate,
+            n_fft=n_fft,
+            f_min=f_min,
+            f_max=f_max,
+            n_mels=n_mels,
+        )
         self.to_db = torchaudio.transforms.AmplitudeToDB()
         self.spec_bn = nn.BatchNorm2d(1)
 
         # Pons front-end
-        m1 = Conv_V(1, 204, (int(0.7*96), 7))
-        m2 = Conv_V(1, 204, (int(0.4*96), 7))
+        m1 = Conv_V(1, 204, (int(0.7 * 96), 7))
+        m2 = Conv_V(1, 204, (int(0.4 * 96), 7))
         m3 = Conv_H(1, 51, 129)
         m4 = Conv_H(1, 51, 65)
         m5 = Conv_H(1, 51, 33)
         self.layers = nn.ModuleList([m1, m2, m3, m4, m5])
 
         # Pons back-end
-        backend_channel= 512 if dataset=='msd' else 64
+        backend_channel = 512 if dataset == "msd" else 64
         self.layer1 = Conv_1d(561, backend_channel, 7, 1, 1)
         self.layer2 = Conv_1d(backend_channel, backend_channel, 7, 1, 1)
         self.layer3 = Conv_1d(backend_channel, backend_channel, 7, 1, 1)
 
         # Dense
-        dense_channel = 500 if dataset=='msd' else 200
-        self.dense1 = nn.Linear((561+(backend_channel*3))*2, dense_channel)
+        dense_channel = 500 if dataset == "msd" else 200
+        self.dense1 = nn.Linear((561 + (backend_channel * 3)) * 2, dense_channel)
         self.bn = nn.BatchNorm1d(dense_channel)
         self.relu = nn.ReLU()
         self.dropout = nn.Dropout(0.5)
@@ -149,34 +167,39 @@ class Musicnn(nn.Module):
 
 
 class CRNN(nn.Module):
-    '''
+    """
     Choi et al. 2017
     Convolution recurrent neural networks for music classification.
     Feature extraction with CNN + temporal summary with RNN
-    '''
-    def __init__(self,
-                sample_rate=16000,
-                n_fft=512,
-                f_min=0.0,
-                f_max=8000.0,
-                n_mels=96,
-                n_class=50):
+    """
+
+    def __init__(
+        self,
+        sample_rate=16000,
+        n_fft=512,
+        f_min=0.0,
+        f_max=8000.0,
+        n_mels=96,
+        n_class=50,
+    ):
         super(CRNN, self).__init__()
 
         # Spectrogram
-        self.spec = torchaudio.transforms.MelSpectrogram(sample_rate=sample_rate,
-                                                         n_fft=n_fft,
-                                                         f_min=f_min,
-                                                         f_max=f_max,
-                                                         n_mels=n_mels)
+        self.spec = torchaudio.transforms.MelSpectrogram(
+            sample_rate=sample_rate,
+            n_fft=n_fft,
+            f_min=f_min,
+            f_max=f_max,
+            n_mels=n_mels,
+        )
         self.to_db = torchaudio.transforms.AmplitudeToDB()
         self.spec_bn = nn.BatchNorm2d(1)
 
         # CNN
-        self.layer1 = Conv_2d(1, 64, pooling=(2,2))
-        self.layer2 = Conv_2d(64, 128, pooling=(3,3))
-        self.layer3 = Conv_2d(128, 128, pooling=(4,4))
-        self.layer4 = Conv_2d(128, 128, pooling=(4,4))
+        self.layer1 = Conv_2d(1, 64, pooling=(2, 2))
+        self.layer2 = Conv_2d(64, 128, pooling=(3, 3))
+        self.layer3 = Conv_2d(128, 128, pooling=(4, 4))
+        self.layer4 = Conv_2d(128, 128, pooling=(4, 4))
 
         # RNN
         self.layer5 = nn.GRU(128, 32, 2, batch_first=True)
@@ -213,13 +236,13 @@ class CRNN(nn.Module):
 
 
 class SampleCNN(nn.Module):
-    '''
+    """
     Lee et al. 2017
     Sample-level deep convolutional neural networks for music auto-tagging using raw waveforms.
     Sample-level CNN.
-    '''
-    def __init__(self,
-                 n_class=50):
+    """
+
+    def __init__(self, n_class=50):
         super(SampleCNN, self).__init__()
         self.layer1 = Conv_1d(1, 128, shape=3, stride=3, pooling=1)
         self.layer2 = Conv_1d(128, 128, shape=3, stride=1, pooling=3)
@@ -256,13 +279,13 @@ class SampleCNN(nn.Module):
 
 
 class SampleCNNSE(nn.Module):
-    '''
+    """
     Kim et al. 2018
     Sample-level CNN architectures for music auto-tagging using raw waveforms.
     Sample-level CNN + residual connections + squeeze & excitation.
-    '''
-    def __init__(self,
-                 n_class=50):
+    """
+
+    def __init__(self, n_class=50):
         super(SampleCNNSE, self).__init__()
         self.layer1 = ResSE_1d(1, 128, shape=3, stride=3, pooling=1)
         self.layer2 = ResSE_1d(128, 128, shape=3, stride=1, pooling=3)
@@ -302,43 +325,48 @@ class SampleCNNSE(nn.Module):
 
 
 class ShortChunkCNN(nn.Module):
-    '''
+    """
     Short-chunk CNN architecture.
     So-called vgg-ish model with a small receptive field.
     Deeper layers, smaller pooling (2x2).
-    '''
-    def __init__(self,
-                n_channels=128,
-                sample_rate=16000,
-                n_fft=512,
-                f_min=0.0,
-                f_max=8000.0,
-                n_mels=128,
-                n_class=50):
+    """
+
+    def __init__(
+        self,
+        n_channels=128,
+        sample_rate=16000,
+        n_fft=512,
+        f_min=0.0,
+        f_max=8000.0,
+        n_mels=128,
+        n_class=50,
+    ):
         super(ShortChunkCNN, self).__init__()
 
         # Spectrogram
-        self.spec = torchaudio.transforms.MelSpectrogram(sample_rate=sample_rate,
-                                                         n_fft=n_fft,
-                                                         f_min=f_min,
-                                                         f_max=f_max,
-                                                         n_mels=n_mels)
+        self.spec = torchaudio.transforms.MelSpectrogram(
+            sample_rate=sample_rate,
+            n_fft=n_fft,
+            f_min=f_min,
+            f_max=f_max,
+            n_mels=n_mels,
+        )
         self.to_db = torchaudio.transforms.AmplitudeToDB()
         self.spec_bn = nn.BatchNorm2d(1)
 
         # CNN
         self.layer1 = Conv_2d(1, n_channels, pooling=2)
         self.layer2 = Conv_2d(n_channels, n_channels, pooling=2)
-        self.layer3 = Conv_2d(n_channels, n_channels*2, pooling=2)
-        self.layer4 = Conv_2d(n_channels*2, n_channels*2, pooling=2)
-        self.layer5 = Conv_2d(n_channels*2, n_channels*2, pooling=2)
-        self.layer6 = Conv_2d(n_channels*2, n_channels*2, pooling=2)
-        self.layer7 = Conv_2d(n_channels*2, n_channels*4, pooling=2)
+        self.layer3 = Conv_2d(n_channels, n_channels * 2, pooling=2)
+        self.layer4 = Conv_2d(n_channels * 2, n_channels * 2, pooling=2)
+        self.layer5 = Conv_2d(n_channels * 2, n_channels * 2, pooling=2)
+        self.layer6 = Conv_2d(n_channels * 2, n_channels * 2, pooling=2)
+        self.layer7 = Conv_2d(n_channels * 2, n_channels * 4, pooling=2)
 
         # Dense
-        self.dense1 = nn.Linear(n_channels*4, n_channels*4)
-        self.bn = nn.BatchNorm1d(n_channels*4)
-        self.dense2 = nn.Linear(n_channels*4, n_class)
+        self.dense1 = nn.Linear(n_channels * 4, n_channels * 4)
+        self.bn = nn.BatchNorm1d(n_channels * 4)
+        self.dense2 = nn.Linear(n_channels * 4, n_class)
         self.dropout = nn.Dropout(0.5)
         self.relu = nn.ReLU()
 
@@ -376,41 +404,46 @@ class ShortChunkCNN(nn.Module):
 
 
 class ShortChunkCNN_Res(nn.Module):
-    '''
+    """
     Short-chunk CNN architecture with residual connections.
-    '''
-    def __init__(self,
-                n_channels=128,
-                sample_rate=16000,
-                n_fft=512,
-                f_min=0.0,
-                f_max=8000.0,
-                n_mels=128,
-                n_class=50):
+    """
+
+    def __init__(
+        self,
+        n_channels=128,
+        sample_rate=16000,
+        n_fft=512,
+        f_min=0.0,
+        f_max=8000.0,
+        n_mels=128,
+        n_class=50,
+    ):
         super(ShortChunkCNN_Res, self).__init__()
 
         # Spectrogram
-        self.spec = torchaudio.transforms.MelSpectrogram(sample_rate=sample_rate,
-                                                         n_fft=n_fft,
-                                                         f_min=f_min,
-                                                         f_max=f_max,
-                                                         n_mels=n_mels)
+        self.spec = torchaudio.transforms.MelSpectrogram(
+            sample_rate=sample_rate,
+            n_fft=n_fft,
+            f_min=f_min,
+            f_max=f_max,
+            n_mels=n_mels,
+        )
         self.to_db = torchaudio.transforms.AmplitudeToDB()
         self.spec_bn = nn.BatchNorm2d(1)
 
         # CNN
         self.layer1 = Res_2d(1, n_channels, stride=2)
         self.layer2 = Res_2d(n_channels, n_channels, stride=2)
-        self.layer3 = Res_2d(n_channels, n_channels*2, stride=2)
-        self.layer4 = Res_2d(n_channels*2, n_channels*2, stride=2)
-        self.layer5 = Res_2d(n_channels*2, n_channels*2, stride=2)
-        self.layer6 = Res_2d(n_channels*2, n_channels*2, stride=2)
-        self.layer7 = Res_2d(n_channels*2, n_channels*4, stride=2)
+        self.layer3 = Res_2d(n_channels, n_channels * 2, stride=2)
+        self.layer4 = Res_2d(n_channels * 2, n_channels * 2, stride=2)
+        self.layer5 = Res_2d(n_channels * 2, n_channels * 2, stride=2)
+        self.layer6 = Res_2d(n_channels * 2, n_channels * 2, stride=2)
+        self.layer7 = Res_2d(n_channels * 2, n_channels * 4, stride=2)
 
         # Dense
-        self.dense1 = nn.Linear(n_channels*4, n_channels*4)
-        self.bn = nn.BatchNorm1d(n_channels*4)
-        self.dense2 = nn.Linear(n_channels*4, n_class)
+        self.dense1 = nn.Linear(n_channels * 4, n_channels * 4)
+        self.bn = nn.BatchNorm1d(n_channels * 4)
+        self.dense2 = nn.Linear(n_channels * 4, n_class)
         self.dropout = nn.Dropout(0.5)
         self.relu = nn.ReLU()
 
@@ -448,49 +481,56 @@ class ShortChunkCNN_Res(nn.Module):
 
 
 class CNNSA(nn.Module):
-    '''
+    """
     Won et al. 2019
     Toward interpretable music tagging with self-attention.
     Feature extraction with CNN + temporal summary with Transformer encoder.
-    '''
-    def __init__(self,
-                n_channels=128,
-                sample_rate=16000,
-                n_fft=512,
-                f_min=0.0,
-                f_max=8000.0,
-                n_mels=128,
-                n_class=50):
+    """
+
+    def __init__(
+        self,
+        n_channels=128,
+        sample_rate=16000,
+        n_fft=512,
+        f_min=0.0,
+        f_max=8000.0,
+        n_mels=128,
+        n_class=50,
+    ):
         super(CNNSA, self).__init__()
 
         # Spectrogram
-        self.spec = torchaudio.transforms.MelSpectrogram(sample_rate=sample_rate,
-                                                         n_fft=n_fft,
-                                                         f_min=f_min,
-                                                         f_max=f_max,
-                                                         n_mels=n_mels)
+        self.spec = torchaudio.transforms.MelSpectrogram(
+            sample_rate=sample_rate,
+            n_fft=n_fft,
+            f_min=f_min,
+            f_max=f_max,
+            n_mels=n_mels,
+        )
         self.to_db = torchaudio.transforms.AmplitudeToDB()
         self.spec_bn = nn.BatchNorm2d(1)
 
         # CNN
         self.layer1 = Res_2d(1, n_channels, stride=2)
         self.layer2 = Res_2d(n_channels, n_channels, stride=2)
-        self.layer3 = Res_2d(n_channels, n_channels*2, stride=2)
-        self.layer4 = Res_2d(n_channels*2, n_channels*2, stride=(2, 1))
-        self.layer5 = Res_2d(n_channels*2, n_channels*2, stride=(2, 1))
-        self.layer6 = Res_2d(n_channels*2, n_channels*2, stride=(2, 1))
-        self.layer7 = Res_2d(n_channels*2, n_channels*2, stride=(2, 1))
+        self.layer3 = Res_2d(n_channels, n_channels * 2, stride=2)
+        self.layer4 = Res_2d(n_channels * 2, n_channels * 2, stride=(2, 1))
+        self.layer5 = Res_2d(n_channels * 2, n_channels * 2, stride=(2, 1))
+        self.layer6 = Res_2d(n_channels * 2, n_channels * 2, stride=(2, 1))
+        self.layer7 = Res_2d(n_channels * 2, n_channels * 2, stride=(2, 1))
 
         # Transformer encoder
-        bert_config = BertConfig(vocab_size=256,
-                                 hidden_size=256,
-                                 num_hidden_layers=2,
-                                 num_attention_heads=8,
-                                 intermediate_size=1024,
-                                 hidden_act="gelu",
-                                 hidden_dropout_prob=0.4,
-                                 max_position_embeddings=700,
-                                 attention_probs_dropout_prob=0.5)
+        bert_config = BertConfig(
+            vocab_size=256,
+            hidden_size=256,
+            num_hidden_layers=2,
+            num_attention_heads=8,
+            intermediate_size=1024,
+            hidden_act="gelu",
+            hidden_dropout_prob=0.4,
+            max_position_embeddings=700,
+            attention_probs_dropout_prob=0.5,
+        )
         self.encoder = BertEncoder(bert_config)
         self.pooler = BertPooler(bert_config)
         self.vec_cls = self.get_cls(256)
@@ -547,30 +587,35 @@ class CNNSA(nn.Module):
 
 
 class HarmonicCNN(nn.Module):
-    '''
+    """
     Won et al. 2020
     Data-driven harmonic filters for audio representation learning.
     Trainable harmonic band-pass filters, short-chunk CNN.
-    '''
-    def __init__(self,
-                n_channels=128,
-                sample_rate=16000,
-                n_fft=512,
-                f_min=0.0,
-                f_max=8000.0,
-                n_mels=128,
-                n_class=50,
-                n_harmonic=6,
-                semitone_scale=2,
-                learn_bw='only_Q'):
+    """
+
+    def __init__(
+        self,
+        n_channels=128,
+        sample_rate=16000,
+        n_fft=512,
+        f_min=0.0,
+        f_max=8000.0,
+        n_mels=128,
+        n_class=50,
+        n_harmonic=6,
+        semitone_scale=2,
+        learn_bw="only_Q",
+    ):
         super(HarmonicCNN, self).__init__()
 
         # Harmonic STFT
-        self.hstft = HarmonicSTFT(sample_rate=sample_rate,
-                                  n_fft=n_fft,
-                                  n_harmonic=n_harmonic,
-                                  semitone_scale=semitone_scale,
-                                  learn_bw=learn_bw)
+        self.hstft = HarmonicSTFT(
+            sample_rate=sample_rate,
+            n_fft=n_fft,
+            n_harmonic=n_harmonic,
+            semitone_scale=semitone_scale,
+            learn_bw=learn_bw,
+        )
         self.hstft_bn = nn.BatchNorm2d(n_harmonic)
 
         # CNN
@@ -578,14 +623,14 @@ class HarmonicCNN(nn.Module):
         self.layer2 = Res_2d_mp(n_channels, n_channels, pooling=2)
         self.layer3 = Res_2d_mp(n_channels, n_channels, pooling=2)
         self.layer4 = Res_2d_mp(n_channels, n_channels, pooling=2)
-        self.layer5 = Conv_2d(n_channels, n_channels*2, pooling=2)
-        self.layer6 = Res_2d_mp(n_channels*2, n_channels*2, pooling=(2,3))
-        self.layer7 = Res_2d_mp(n_channels*2, n_channels*2, pooling=(2,3))
+        self.layer5 = Conv_2d(n_channels, n_channels * 2, pooling=2)
+        self.layer6 = Res_2d_mp(n_channels * 2, n_channels * 2, pooling=(2, 3))
+        self.layer7 = Res_2d_mp(n_channels * 2, n_channels * 2, pooling=(2, 3))
 
         # Dense
-        self.dense1 = nn.Linear(n_channels*2, n_channels*2)
-        self.bn = nn.BatchNorm1d(n_channels*2)
-        self.dense2 = nn.Linear(n_channels*2, n_class)
+        self.dense1 = nn.Linear(n_channels * 2, n_channels * 2)
+        self.bn = nn.BatchNorm1d(n_channels * 2)
+        self.dense2 = nn.Linear(n_channels * 2, n_class)
         self.dropout = nn.Dropout(0.5)
         self.relu = nn.ReLU()
 
@@ -617,4 +662,3 @@ class HarmonicCNN(nn.Module):
         x = nn.Sigmoid()(x)
 
         return x
-
