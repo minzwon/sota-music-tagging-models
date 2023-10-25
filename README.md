@@ -52,7 +52,7 @@ Options
 
 ```
 '--num_workers', type=int, default=0
-'--dataset', type=str, default='mtat', choices=['mtat', 'msd', 'jamendo']
+'--dataset', type=str, default='mtat', choices=['mtat', 'msd', 'jamendo', 'gtzan']
 '--model_type', type=str, default='fcn',
 				choices=['fcn', 'musicnn', 'crnn', 'sample', 'se', 'short', 'short_res', 'attention', 'hcnn']
 '--n_epochs', type=int, default=200
@@ -74,7 +74,7 @@ Options
 
 ```
 '--num_workers', type=int, default=0
-'--dataset', type=str, default='mtat', choices=['mtat', 'msd', 'jamendo']
+'--dataset', type=str, default='mtat', choices=['mtat', 'msd', 'jamendo', 'gtzan']
 '--model_type', type=str, default='fcn',
                 choices=['fcn', 'musicnn', 'crnn', 'sample', 'se', 'short', 'short_res', 'attention', 'hcnn']
 '--batch_size', type=int, default=16
