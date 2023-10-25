@@ -210,7 +210,7 @@ class Predict(object):
             # forward
             x = self.to_var(x)
             y = torch.tensor(
-                [ground_truth.astype("float32") for i in range(self.batch_size)]
+                np.tile(ground_truth.astype("float32"), (self.batch_size, 1))
             ).cuda()
             out = self.model(x)
             loss = reconst_loss(out, y)

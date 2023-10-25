@@ -42,7 +42,7 @@ class Dataset(ABC, TorchDataset):
 
     def get_tensor(self, data) -> Tensor:
         npy_path = self.get_npy_path(data)
-        raw = np.load(npy_path, mmap_mode="r")
+        raw = np.load(npy_path, mmap_mode="r+")
         # split chunk
         length = len(raw)
         hop = (length - self.input_length) // self.batch_size
