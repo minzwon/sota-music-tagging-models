@@ -8,6 +8,7 @@ import torch
 import torch.nn as nn
 import tqdm
 from datasets import DATASETS, SplitType, get_dataset
+from matplotlib import pyplot as plt
 from sklearn import metrics
 from torch.autograd import Variable
 
@@ -53,16 +54,73 @@ class Predict(object):
             x = x.cuda()
         return Variable(x)
 
-    def get_auc(self, est_array, gt_array):
-        roc_aucs = metrics.roc_auc_score(gt_array, est_array, average="macro")
-        pr_aucs = metrics.average_precision_score(gt_array, est_array, average="macro")
-        return roc_aucs, pr_aucs
-
     def test(self):
-        roc_auc, pr_auc, loss = self.get_test_score()
+        est_array, gt_array, loss = self.get_test_score()
+        roc_auc_real = metrics.roc_auc_score(gt_array, est_array, average="macro")
+        pr_auc_real = metrics.average_precision_score(
+            gt_array, est_array, average="macro"
+        )
+
+        # calculate pr-auc and roc-auc, and graph both curves
+
+        # https://scikit-learn.org/stable/auto_examples/model_selection/plot_roc.html
+        precision, recall, fpr, tpr, roc_auc, pr_auc = {}, {}, {}, {}, {}, {}
+        n_classes = gt_array.shape[-1]
+        for i in range(n_classes):
+            fpr[i], tpr[i], _ = metrics.roc_curve(gt_array[..., i], est_array[..., i])
+            roc_auc[i] = metrics.auc(fpr[i], tpr[i])
+            precision[i], recall[i], _ = metrics.precision_recall_curve(
+                gt_array[..., i], est_array[..., i]
+            )
+            pr_auc[i] = metrics.auc(recall[i], precision[i])
+
+        fpr_grid = np.linspace(0.0, 1.0, 1000)
+        recall_grid = np.linspace(0.0, 1.0, 1000)
+
+        # Interpolate all curves at these points
+        mean_tpr = np.zeros_like(fpr_grid)
+        mean_precision = np.zeros_like(recall_grid)
+
+        for i in range(n_classes):
+            mean_tpr += np.interp(fpr_grid, fpr[i], tpr[i])  # linear interpolation
+            mean_precision += np.interp(
+                recall_grid, recall[i][::-1], precision[i][::-1]
+            )  # reverse so recall array is increasing
+
+        # Average it and compute AUC
+        mean_tpr /= n_classes
+        mean_precision /= n_classes
+
+        fpr["macro"] = fpr_grid
+        tpr["macro"] = mean_tpr
+        recall["macro"] = recall_grid
+        precision["macro"] = mean_precision
+        roc_auc["macro"] = metrics.auc(fpr["macro"], tpr["macro"])
+        pr_auc["macro"] = metrics.auc(recall["macro"], precision["macro"])
+
         print("loss: %.4f" % loss)
-        print("roc_auc: %.4f" % roc_auc)
-        print("pr_auc: %.4f" % pr_auc)
+        print("roc_auc: %.4f" % roc_auc_real)
+        print("pr_auc: %.4f" % pr_auc_real)
+        plt.figure(1)
+        plt.plot(
+            fpr["macro"],
+            tpr["macro"],
+            label=f"macro-average ROC curve (AUC = {roc_auc_real:.2f})",
+        )
+        plt.xlabel("False Positive Rate")
+        plt.ylabel("True Positive Rate")
+        plt.legend()
+
+        plt.figure(2)
+        plt.plot(
+            recall["macro"],
+            precision["macro"],
+            label=f"macro-average PR curve (AUC = {pr_auc_real:.2f})",
+        )
+        plt.xlabel("Recall")
+        plt.ylabel("Precision")
+        plt.legend()
+        plt.show()
 
     def get_test_score(self):
         self.model = self.model.eval()
@@ -95,8 +153,7 @@ class Predict(object):
         est_array, gt_array = np.array(est_array), np.array(gt_array)
         loss = np.mean(losses)
 
-        roc_auc, pr_auc = self.get_auc(est_array, gt_array)
-        return roc_auc, pr_auc, loss
+        return est_array, gt_array, loss
 
 
 if __name__ == "__main__":
